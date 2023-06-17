@@ -1,0 +1,20 @@
+﻿@{
+    ViewData["Title"] = "Главная страница";
+}
+
+<div class="text-center">
+    <h1 class="display-4">MoscowWeather</h1>
+    <p><a href="/Weather/Upload">Выгрузить ZIP-архив</a> в базу данных.</p>
+    <p>
+        Просморт данных: 
+        <input type="text" id="year-input" class="form-control short-input" placeholder="Год поиска" />
+        <input type="button" class="btn btn-primary short-input" value="Найти" onclick="findData()" />
+    </p>
+
+    <script>
+        function findData() {
+            const yearInputElement = document.getElementById("year-input");
+            document.location.href = `/Weather/DataView/${yearInputElement.value}`;
+        }
+    </script>
+</div>

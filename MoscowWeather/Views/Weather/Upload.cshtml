@@ -1,0 +1,35 @@
+﻿@{
+    ViewData["Title"] = "Выгрузка данных";
+}
+
+<div class="text-center">
+    <h1 class="display-6">Выгрузка данных</h1>
+
+    <form method="post" action="/Weather/UploadFile" enctype="multipart/form-data" id="file-form">
+        <input type="file" accept=".zip" id="file-input" />
+        <input type="button" value="Отправить" onclick="submitForm()" />
+    </form>
+
+    <script>
+        async function submitForm() {
+            const fromElement = document.getElementById("file-form");
+            const fileInput = document.getElementById("file-input");
+
+            const formData = new FormData();
+            formData.append("file", fileInput.files[0]);
+
+            const response = await fetch(fromElement.action, {
+                method: "POST",
+                body: formData
+            });
+
+            if (response.ok) {
+                const data = await response.json();
+                alert(`Количество изменений: ${data.changesCount}`);
+            }
+            else {
+                alert("Ошибка выполнения операции");
+            }
+        }
+    </script>
+</div>

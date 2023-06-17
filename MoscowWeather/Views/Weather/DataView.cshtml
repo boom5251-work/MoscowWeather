@@ -1,0 +1,132 @@
+﻿@using Microsoft.EntityFrameworkCore;
+@using MoscowWeather.DataAccess.Context;
+@using System.Globalization;
+
+@inject IDatabaseContext context;
+
+
+@{
+    ViewData["Title"] = "Просмотр данных";
+
+    var months = new string[]
+    {
+        "january", "february", "march", "april", "may", "june",
+        "july", "august", "september", "october", "november", "december"
+    };
+
+    var monthsRu = new string[]
+    {
+        "Январь", "Февраль", "Март", "Апрель", "Май", "Июнь",
+        "Июль", "Август", "Сентябрь", "Октябрь", "Ноябрь", "Декабрь"
+    };
+
+
+    string GetClassName(int count) =>
+        count == 0 ? "tab-pane fade show active" : "tab-pane fade";
+}
+
+
+<div class="text-center">
+    <p>
+        Просморт данных:
+        <input type="text" id="year-input" class="form-control short-input" placeholder="Год поиска" />
+        <input type="button" class="btn btn-primary short-input" value="Найти" onclick="findData()" />
+    </p>
+
+    <script>
+        function findData() {
+            const yearInputElement = document.getElementById("year-input");
+            document.location.href = `/Weather/DataView/${yearInputElement.value}`;
+        }
+    </script>
+    
+    @if ((int?)ViewData["Year"] is not null)
+    {
+        <h1 class="display-6">Просмотр данных за @ViewData["Year"] год</h1>
+
+        <ul class="nav nav-tabs" id="tabs-navigation">
+            @for (int i = 0; i < 12; i++)
+            {
+                <li class="nav-item">
+                    @if (i == 0)
+                    {
+                        <a class="nav-link active" data-toggle="tab" href="#@months?[i]">@monthsRu?[i]</a>
+                    }
+                    else
+                    {
+                        <a class="nav-link" data-toggle="tab" href="#@months?[i]">@monthsRu?[i]</a>
+                    }
+                </li>
+            }
+        </ul>
+
+        <div class="tab-content">
+            @for (int i = 0; i < 12; i++)
+            {
+                var conditions = context.WeatherConditions
+                    .Where(item => item.DateTime.Year == (int?)ViewData["Year"] && item.DateTime.Month == i + 1)
+                    .AsNoTracking()
+                    .ToList();
+
+                if (conditions.Count > 0)
+                {
+                    <div class="@GetClassName(i)" id="@months?[i]">
+                        @for (int j = 0; j < conditions.Count; j++)
+                        {
+                            <div class="weather-condition-view">
+                                <span>@conditions[j].DateTime.ToString("D")</span>
+                                <span>@conditions[j].DateTime.ToString("t")</span>
+                                <span>@conditions[j].Temperature &deg;С</span>
+                                <span>@conditions[j].RelativeHumidity</span>
+                                <span>@conditions[j].DewPoint</span>
+                                <span>@conditions[j].AirPressure</span>
+                                <span>@conditions[j].WindDirection</span>
+                                <span>@conditions[j].WindSpeed</span>
+                                <span>@conditions[j].CloudCover</span>
+                                <span>@conditions[j].CloudHeight</span>
+                                <span>@conditions[j].HorizontalVisibility</span>
+                                <span>@conditions[j].WeatherPhenomena</span>
+                            </div>
+                        }
+                    </div>
+                }
+                else
+                {
+                    <div class="@GetClassName(i)" id="@months?[i]">
+                        <span style="font-size: 18px; margin-top: 20px; display: block;">Данные не найдены.</span>
+                    </div>
+                }
+            }
+        </div>
+    }
+</div>
+
+
+@if ((int?)ViewData["Year"] is not null)
+{
+    <div class="values-info-container container">
+        <span>Дата</span>
+        <span>Время</span>
+        <span>Температура</span>
+        <span>Влажность</span>
+        <span>Точка росы</span>
+        <span>Атм. давление</span>
+        <span>Направление ветра</span>
+        <span>Скорость ветра</span>
+        <span>Облачность</span>
+        <span>Высота облаков</span>
+        <span>Видимость</span>
+        <span>Погодные условия</span>
+    </div>
+}
+
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.0/jquery.min.js"></script>
+
+<script src="/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+
+<script>
+    $('#tabs-navigation a').click(function (e) {
+        e.preventDefault();
+        $(this).tab('show');
+    });
+</script>
